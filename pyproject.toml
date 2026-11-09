@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Motor relativista Bobrick-Martire + PSO para simulación y optimización de viajes interestelares"
 readme = "README.md"
 authors = [
-    {name = "Equipo de Investigación Proxima"}
+    {name = "Leonardo Zamudio"}
 ]
 license = {text = "MIT"}
 requires-python = ">=3.11"

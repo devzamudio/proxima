@@ -1,197 +1,204 @@
-# PROXIMA: Particle Relativistic Optimization for Extended Interstellar Mission Analysis
+# PROXIMA (`proxima-warp`)
 
-PROXIMA is a scientific Python library for modeling, simulating, and optimizing relativistic interstellar missions using warp-drive-inspired spacetime geometries grounded in the formal Bobrick–Martire family of solutions in a 3+1 ADM formulation.
+[![PyPI version](https://img.shields.io/pypi/v/proxima-warp.svg?color=blue)](https://pypi.org/project/proxima-warp/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build & Tests](https://img.shields.io/badge/tests-128%20passed-brightgreen.svg)]()
+[![JAX Accelerated](https://img.shields.io/badge/accelerated-JAX%20vmap%20%7C%20jit-red.svg)](https://github.com/google/jax)
 
-It is designed for research workflows that combine:
-
-- relativistic metric evaluation,
-- geodesic propagation and energy-condition checks,
-- astrophysical risk assessment from local catalogs,
-- batched optimization with JAX-based particle swarm methods.
-
-The library targets researchers, engineers, and advanced Python users working on theoretical propulsion, mission design, and high-performance scientific simulation.
+**PROXIMA** (`proxima-warp`) is an end-to-end scientific computing framework and physics-informed simulation engine written in Python and accelerated via JAX. It enables modeling, geodesic integration, risk evaluation, and particle swarm optimization (PSO) for relativistic interstellar travel using modified spacetime warp metrics based on the formal **Bobrick & Martire (2021)** class of geometries within a $3+1$ Arnowitt-Deser-Misner (ADM) formulation.
 
 ---
 
-## Overview
+## Table of Contents
 
-PROXIMA is built around a relativistic metric engine that evaluates a class of warp-like spacetime geometries derived from a 3+1 decomposition of the metric, with support for the canonical Bobrick–Martire parameterization. The project offers the following core capabilities:
-
-1. Metric and curvature evaluation in a relativistic ADM-style framework.
-2. Geodesic integration with adaptive numerical propagation.
-3. Energy-condition classification using Hawking–Ellis reasoning.
-4. Astrophysical data ingestion and risk evaluation using local stellar catalogs.
-5. Vectorized PSO optimization for mission parameter search.
-6. Validation layers for reproducibility, regression safety, and scientific sanity checks.
-
-The implementation uses JAX for accelerated numerical paths and vectorized batch evaluation. This makes it suitable for parameter sweeps, optimization loops, and simulation-heavy workloads where performance matters.
-
----
-
-## Technical specifications
-
-### Supported Python
-
-- Python >= 3.11
-- JAX >= 0.4.30
-- NumPy >= 1.26
-- PyYAML >= 6.0
-
-### Installation targets
-
-The library is intended to run in a standard scientific Python environment, with optional extras for astrophysical workflows.
-
-### Core scientific model
-
-PROXIMA models a warp-like spacetime using a 3+1 decomposition of the metric, with:
-
-- lapse function,
-- shift vector,
-- spatial metric,
-- temporal coordinate evolution,
-- relativistic geodesic propagation,
-- tidal stress constraints,
-- energy-condition diagnostics.
-
-The metric engine computes geometric objects such as:
-
-- Christoffel symbols,
-- Riemann curvature tensor,
-- Ricci tensor,
-- Einstein tensor,
-- ADM-style energy terms,
-- local validity checks for the parameterized domain.
-
-### Numerical behavior
-
-The simulation layer is designed to be robust under physical plausibility checks and numerical regularization, with explicit handling for:
-
-- invalid parameter domains,
-- tidal-stress failure,
-- energy-condition violations,
-- non-finite state values,
-- solver termination states.
-
-### Optimization engine
-
-The optimizer uses a vectorized particle swarm optimization (PSO) implementation with configurable topology:
-
-- global topology,
-- ring topology,
-- inertia decay,
-- acceleration coefficients,
-- velocity clamping,
-- fitness penalties for physical violations and simulation failures.
-
-### Data and risk layer
-
-The data layer includes local catalog connectors and risk evaluation for astronomical conditions, including:
-
-- normalized celestial record ingestion,
-- cross-match resolution,
-- source metadata quality tracking,
-- risk scoring for radiative flux, extinction, mass density, and tidal stress,
-- persistent snapshot and cache support.
+- [Key Architectural Features](#key-architectural-features)
+- [System Architecture & Physics Pipeline](#system-architecture--physics-pipeline)
+  - [1. 3+1 ADM Metric Tensor Kernel](#1-31-adm-metric-tensor-kernel)
+  - [2. Relativistic Geodesic Simulator & Fermi Tidal Tensor](#2-relativistic-geodesic-simulator--fermi-tidal-tensor)
+  - [3. Hawking-Ellis Energy Conditions Classification](#3-hawking-ellis-energy-conditions-classification)
+  - [4. Astrophysical Risk & Environmental Data Layer](#4-astrophysical-risk--environmental-data-layer)
+  - [5. JAX-Vectorized Particle Swarm Optimizer (PSO)](#5-jax-vectorized-particle-swarm-optimizer-pso)
+- [Installation Guide](#installation-guide)
+  - [Basic Installation](#basic-installation)
+  - [Installation with Astronomical Connectors](#installation-with-astronomical-connectors)
+  - [Development Installation](#development-installation)
+- [Quickstart & Usage Examples](#quickstart--usage-examples)
+  - [1. Evaluating the Metric at Spacetime Points](#1-evaluating-the-metric-at-spacetime-points)
+  - [2. Integrating Timelike Geodesics & Observables](#2-integrating-timelike-geodesics--observables)
+  - [3. Querying Real Celestial Environments & In-Transit Risk](#3-querying-real-celestial-environments--in-transit-risk)
+  - [4. Global Multi-Particle Warp Optimization](#4-global-multi-particle-warp-optimization)
+  - [5. Running Calibration, Sensitivity & Non-Regression Suites](#5-running-calibration-sensitivity--non-regression-suites)
+- [Technical Specifications & Conventions](#technical-specifications--conventions)
+- [Author & Academic Citation](#author--academic-citation)
+- [License](#license)
 
 ---
 
-## Package architecture
+## Key Architectural Features
 
-The project is organized as follows:
+- **Covariant $3+1$ ADM Formulation**: Metric lapse function $\alpha(t, \mathbf{x})$, longitudinal and transverse shift vector $\boldsymbol{\beta}(t, \mathbf{x})$, and spatial 3-metric $\gamma_{ij}$.
+- **Hyperbolic Shape Regularization**: Eliminates coordinate singularities at the bubble core via $r_{s,\text{reg}} = \sqrt{r_s^2 + (\epsilon_{\text{rel}} R)^2}$.
+- **Adaptive Geodesic Integration**: 8-dimensional covariant phase-space integration $(X^\mu, u^\mu)$ driven by Dormand-Prince (DP5/RK45) with strict 4-velocity preservation ($|g_{\mu\nu}u^\mu u^\nu + 1| < 10^{-6}$).
+- **Riemann & Fermi Tidal Stress Guard**: Covariant local spatial tidal tensor $\mathcal{E}^i{}_j = c^2 R^i{}_{0 j 0}$ with automatic cut-off preventing spaghettification ($\sigma_{\text{tidal}} \le 9.81\text{ s}^{-2}$).
+- **Hawking-Ellis Type-I Energy Condition Classifiers**: Eigenvalue diagonalization verifying Weak (WEC), Null (NEC), Dominant (DEC), and Strong (SEC) Energy Conditions.
+- **Real Astronomical Field Modeling**: Bundled ICRS-normalized catalogs (Sharpless H II regions, MWSC stellar clusters, and Supernova Remnants) plus live TAP/ADQL clients (Gaia DR3, NASA Exoplanet Archive, SIMBAD, and Bayestar19 dust extinction).
+- **SIMD/JIT Accelerated PSO**: Particle Swarm Optimization fully vectorized via `jax.vmap` and `jax.jit` supporting Global Star and Local Ring communication topologies.
 
-- `src/proxima/contracts` — public dataclasses, protocol interfaces, and contract definitions.
-- `src/proxima/core` — metric kernels, geometric operators, and ADM-related computations.
-- `src/proxima/simulator` — geodesic simulation, energy analysis, and numerical integration.
-- `src/proxima/data` — catalog ingestion, risk models, and data pipeline components.
-- `src/proxima/optimizer` — PSO optimizer, fitness evaluation, and topology handling.
-- `src/proxima/validation` — validation and regression-oriented checks.
-- `configs/` — packaged YAML configuration defaults for scientific and optimizer stages.
+---
 
-The public package entrypoint exposes the main runtime objects through the top-level import path:
+## System Architecture & Physics Pipeline
 
-```python
-import proxima
+The library is organized into cleanly decoupled, typed contract layers:
 
-print(proxima.__version__)
+```
+┌────────────────────────────────────────────────────────┐
+│               PROXIMA WARP ARCHITECTURE                │
+└────────────────────────────────────────────────────────┘
+                           │
+       ┌───────────────────┴───────────────────┐
+       ▼                                       ▼
+┌──────────────────────────────┐ ┌──────────────────────────────┐
+│  1. Metric Core (ADM / BM)   │ │  4. Astronomical Risk Layer  │
+│  - Lapse alpha, Shift beta   │ │  - ICRS / SI Normalization   │
+│  - Hyperbolic Shape Function │ │  - Radiative Fluence & Gas   │
+│  - Curvature & Energy T_mn   │ │  - SHA-256 L1/L2 Multilevel  │
+└──────────────────────────────┘ └──────────────────────────────┘
+               │                               │
+               ▼                               ▼
+┌──────────────────────────────┐ ┌──────────────────────────────┐
+│  2. Relativistic Simulator   │ │  3. Hawking-Ellis Classifier │
+│  - 8D Geodesic Integration   │ │  - WEC, NEC, DEC, SEC Checks │
+│  - Fermi-Walker Tidal Stress │ │  - Algebraic Diagonalization │
+└──────────────────────────────┘ └──────────────────────────────┘
+               │                               │
+               └───────────────┬───────────────┘
+                               ▼
+┌────────────────────────────────────────────────────────┐
+│     5. Vectorized Particle Swarm Optimizer (PSO)       │
+│     - Global / Ring Topology, Inertia Scheduling       │
+│     - JAX vmap Batch Evaluation of Mission Fitness     │
+└────────────────────────────────────────────────────────┘
 ```
 
+### 1. 3+1 ADM Metric Tensor Kernel
+
+Following standard General Relativity conventions with signature $(-, +, +, +)$, spacetime intervals satisfy:
+$$ds^2 = -(\alpha^2 - \beta_i \beta^i) c^2 dt^2 + 2 \beta_i c dt dx^i + \gamma_{ij} dx^i dx^j$$
+
+The Bobrick-Martire parameter vector $\boldsymbol{\theta} \in \mathbb{R}^5$ is defined by:
+- `bubble_radius_m` ($R > 0$): Radius of the flat central bubble interior.
+- `shell_thickness_m` ($\sigma > 0$): Transition wall thickness.
+- `velocity_fraction_c` ($v_s / c$): Bubble coordinate translation speed.
+- `shift_amplitude` ($A_s$): Shift modulation amplitude.
+- `lapse_floor` ($\alpha_0 > 0$): Minimum allowed lapse inside the wall.
+
+### 2. Relativistic Geodesic Simulator & Fermi Tidal Tensor
+
+Geodesics are integrated in normalized affine time $\lambda = c\tau$:
+$$\frac{dX^\mu}{d\lambda} = u^\mu, \qquad \frac{du^\mu}{d\lambda} = -\Gamma^\mu_{\alpha\beta} u^\alpha u^\beta$$
+
+The ship's structural safety is monitored through the spatial tidal tensor in Fermi-Walker coordinates:
+$$\sigma_{\text{tidal}} = \max_k |\lambda_k(\mathcal{E}_{ij})| \quad [\si{\per\second\squared}]$$
+
+### 3. Hawking-Ellis Energy Conditions Classification
+
+The effective stress-energy-momentum tensor $T_{\mu\nu} = \frac{c^4}{8\pi G} G_{\mu\nu}$ is diagonalized to inspect physical matter energy constraints:
+- **WEC**: $\rho \ge 0 \quad \land \quad \rho + p_i \ge 0$
+- **NEC**: $\rho + p_i \ge 0$
+- **DEC**: $\rho \ge 0 \quad \land \quad \rho \ge |p_i|$
+- **SEC**: $\rho + \sum p_i \ge 0 \quad \land \quad \rho + p_i \ge 0$
+
+### 4. Astrophysical Risk & Environmental Data Layer
+
+Transit segments are evaluated for four cumulative physical hazards:
+1. **Integrated Radiative Fluence** ($\si{\joule\per\meter\squared}$): $F = \sum_k \frac{L_k}{4\pi v} \int \frac{ds}{r_k(s)^2 + R_k^2}$
+2. **Neutral Hydrogen Column & Extinction** ($\si{\per\meter\squared}$): Background ISM ($n_H = 10^5\text{ m}^{-3}$) plus chord lengths through H II clouds and supernova remnants.
+3. **Local Mass Density Field** ($\si{\kilo\gram\per\meter\cubed}$).
+4. **External Gravitational Tidal Gradients** ($\si{\per\second\squared}$).
+
+### 5. JAX-Vectorized Particle Swarm Optimizer (PSO)
+
+The swarm explores the warp configuration hyperspace using linearly decreasing inertia scheduling $w(t)$ and configurable social attraction topologies (Global Star or Local Ring), evaluating the composite scalar objective:
+$$\mathcal{F}_{\text{total}} = \mathcal{J}_{\text{mission}} + \mathcal{P}_{\text{physical}} + \mathcal{P}_{\text{risk}} + \mathcal{P}_{\text{operational}}$$
+
 ---
 
-## Installation
+## Installation Guide
 
-### From PyPI
+### Basic Installation
 
+Install the production wheel from PyPI:
 ```bash
 pip install proxima-warp
 ```
 
-### With astronomy extras
+### Installation with Astronomical Connectors
 
-The optional extras provide additional astrophysical dependencies for catalog-driven risk workflows:
-
+To enable live remote queries to NASA Exoplanet Archive, Gaia DR3 TAP services, SIMBAD, and 3D dust models:
 ```bash
 pip install "proxima-warp[astro]"
 ```
 
-### For development and tests
+### Development Installation
 
+To install testing utilities and contribute to the repository:
 ```bash
-pip install "proxima-warp[dev]"
-```
-
-### From source
-
-If you are installing directly from a local checkout:
-
-```bash
-git clone https://github.com/your-org/proxima.git
+git clone https://github.com/Leonardo-Zamudio/proxima.git
 cd proxima
-pip install -e .
-```
-
-### Verify installation
-
-```bash
-python -c "import proxima; print(proxima.__version__)"
+pip install -e ".[dev,astro]"
+pytest -ra
 ```
 
 ---
 
-## Quick start
+## Quickstart & Usage Examples
 
-### 1. Create a warp parameter vector
+### 1. Evaluating the Metric at Spacetime Points
 
 ```python
-from proxima import WarpParameterVector
+from proxima import (
+    BobrickMartireMetricCore,
+    MetricStatePoint,
+    WarpParameterVector,
+)
 
+# 1. Instantiate canonical Bobrick-Martire warp parameters
 params = WarpParameterVector(
-    bubble_radius_m=100.0,
-    shell_thickness_m=5.0,
-    velocity_fraction_c=0.5,
+    bubble_radius_m=100.0,       # 100-meter interior habitat
+    shell_thickness_m=5.0,        # 5-meter wall thickness
+    velocity_fraction_c=0.5,      # 0.5 c subluminal transit
     shift_amplitude=1.0,
     lapse_floor=0.01,
-    metadata={"mission": "demo"},
 )
+
+# 2. Define an evaluation event (t, x, y, z, tau)
+point = MetricStatePoint(t_s=0.0, x_m=10.0, y_m=0.0, z_m=0.0, tau_s=0.0)
+
+# 3. Evaluate ADM metric components and diagnostics
+core = BobrickMartireMetricCore()
+eval_metric = core.evaluate_metric(params, point)
+
+print("Lapse function alpha:", eval_metric.lapse)
+print("Shift vector beta (m/s):", eval_metric.shift_vector)
+print("Spatial metric gamma_ij:", eval_metric.spatial_metric)
+print("Eulerian energy density (J/m^3):", eval_metric.diagnostics["rho_eulerian_J_m3"])
 ```
 
-### 2. Define initial state and scientific conventions
+### 2. Integrating Timelike Geodesics & Observables
 
 ```python
-from proxima.contracts.types import (
-    MetricSignature,
-    MetricStatePoint,
+from proxima import (
+    RelativisticSimulator,
+    SimulationRequest,
     ScientificConventions,
+    MetricStatePoint,
+    WarpParameterVector,
     Frame,
+    MetricSignature,
 )
 
-state = MetricStatePoint(
-    t_s=0.0,
-    x_m=0.0,
-    y_m=0.0,
-    z_m=0.0,
-    tau_s=0.0,
-)
-
+# Set scientific conventions (SI units, -+++ signature)
 conventions = ScientificConventions(
     phase0_version="1.0.0",
     metric_signature=MetricSignature.MINUS_PLUS_PLUS_PLUS,
@@ -202,377 +209,154 @@ conventions = ScientificConventions(
     atol=1e-10,
     rtol=1e-8,
 )
-```
-
-### 3. Evaluate the metric directly
-
-```python
-from proxima import BobrickMartireMetricCore
-
-core = BobrickMartireMetricCore()
-result = core.evaluate_metric(params, state)
-
-print(result.lapse)
-print(result.shift_vector)
-print(result.valid_domain)
-```
-
-The metric evaluation returns a structured result with:
-
-- lapse function,
-- shift vector,
-- spatial metric,
-- validity flag,
-- diagnostic metadata.
-
----
-
-## Geodesic simulation example
-
-```python
-from proxima import RelativisticSimulator, SimulationRequest
-
-simulator = RelativisticSimulator()
-request = SimulationRequest(
-    params=params,
-    initial_state=state,
-    conventions=conventions,
-    max_steps=200,
-)
-
-result = simulator.simulate(request)
-
-print(result.status)
-if result.observables is not None:
-    print(result.observables.delta_tau_s)
-    print(result.observables.delta_t_s)
-    print(result.observables.total_energy_j)
-    print(result.observables.tidal_stress_max_si)
-```
-
-### Simulation output semantics
-
-The simulation result contains:
-
-- status: success or failure,
-- observables: accumulated proper time, coordinate time, total energy, and maximum tidal stress,
-- energy-condition diagnostics,
-- failure_reason if the run terminates outside acceptable physical conditions,
-- diagnostics with solver metadata and auxiliary information.
-
-This is the primary runtime interface for evaluating candidate warp configurations under relativistic propagation.
-
----
-
-## PSO optimization example
-
-```python
-from proxima import VectorizedPSO, PSOConfig
-
-cfg = PSOConfig(
-    n_particles=20,
-    n_iterations=30,
-    seed=42,
-    topology="global",
-)
-
-pso = VectorizedPSO(config=cfg)
-result = pso.optimize_warp(seed=42)
-
-print(result.best_params)
-print(result.best_fitness)
-print(result.history.gbest_fitness_history[-1])
-```
-
-### Optimization workflow
-
-The optimizer can be used to search over warp parameter vectors by minimizing a fitness objective that accounts for:
-
-- mission duration,
-- proper-time efficiency,
-- physical penalties,
-- risk terms,
-- invalid-domain penalties,
-- simulation failure penalties.
-
-The optimizer is vectorized with JAX and is designed to operate efficiently on batched particle populations.
-
----
-
-## Data layer and risk provider
-
-PROXIMA includes a data ingestion layer for celestial and astrophysical sources. This component can be used to build risk-aware mission planning workflows.
-
-```python
-from proxima.data.pipeline import default_local_risk_provider
-
-risk_provider = default_local_risk_provider()
-print(type(risk_provider))
-```
-
-This risk provider integrates catalog data and produces a structured risk assessment used by the mission model to penalize routes that pass through high-radiation or high-extinction regions.
-
-### Typical risk components
-
-- radiative flux score,
-- extinction score,
-- mass-density score,
-- tidal-stress score,
-- aggregated total risk score,
-- data source quality metadata.
-
----
-
-## Public API reference
-
-The most common imports are exposed at the package root:
-
-```python
-from proxima import (
-    __version__,
-    WarpParameterVector,
-    MetricStatePoint,
-    ScientificConventions,
-    SimulationRequest,
-    SimulationResult,
-    BobrickMartireMetricCore,
-    RelativisticSimulator,
-    VectorizedPSO,
-    PSOConfig,
-    RelativisticFitnessEvaluator,
-    AstronomicalRiskProvider,
-    default_local_risk_provider,
-)
-```
-
-For lower-level types and enums, use:
-
-```python
-from proxima.contracts.types import (
-    MetricSignature,
-    Frame,
-    EnergyCondition,
-    SimulationStatus,
-)
-```
-
-### Core dataclasses
-
-- `WarpParameterVector`: parametric description of the warp field.
-- `MetricStatePoint`: spacetime state, including time and spatial coordinates.
-- `ScientificConventions`: physical constants and numerical tolerances.
-- `SimulationRequest`: model input for a geodesic propagation run.
-- `SimulationResult`: outcome of a full simulation pass.
-- `RiskBreakdown`: aggregated risk metadata.
-- `FitnessBreakdown`: decomposed objective-function components.
-
----
-
-## Scientific assumptions and conventions
-
-PROXIMA is a research library and assumes explicit scientific conventions rather than hidden defaults. Users are expected to provide or configure:
-
-- physical constants,
-- metric signature,
-- frame conventions,
-- solver tolerances,
-- regularization parameters,
-- domain validity thresholds.
-
-The default configuration sources are packaged under the project config tree, and are loaded automatically when needed.
-
-### Units
-
-The library follows a physically explicit convention where relevant variables are expressed in SI-like units:
-
-- length in meters,
-- time in seconds,
-- energy in joules,
-- speeds in meters per second,
-- gravitational constant in SI units,
-- c in meters per second.
-
-### Numerical safety
-
-The sim engine explicitly checks for:
-
-- non-finite initial values,
-- invalid metric domains,
-- unphysical state propagation,
-- energy-condition violations,
-- excessive tidal stress.
-
-This is intentional: the package is designed for scientific exploration, not only for “black-box” optimization.
-
----
-
-## Typical usage patterns
-
-### Research loop
-
-1. Configure mission parameters.
-2. Evaluate local metric behavior.
-3. Propagate candidate trajectories.
-4. Classify energy conditions.
-5. Assess route risk from data providers.
-6. Optimize the warp parameter vector with PSO.
-7. Repeat with refined bounds or scientific assumptions.
-
-### Parameter sweeps
-
-Because the numerical kernels are JAX-based and batch-capable, PROXIMA is suitable for parameter sweeps and sensitivity scans across a grid of warp parameters.
-
-### Mission heuristics
-
-The library can be integrated into larger analytical or optimization workflows that combine:
-
-- route planning,
-- astrophysical environment assessment,
-- physical condition screening,
-- mission objective scoring.
-
----
-
-## Error handling and diagnostics
-
-The library is designed to fail explicitly when inputs are invalid or when a simulation crosses a domain or stability threshold. Typical failure modes include:
-
-- invalid parameter values,
-- non-finite state components,
-- solver termination due to instability,
-- excessive tidal stress,
-- energy-condition rejection.
-
-Each simulation result provides diagnostics for downstream workflows and post-processing analysis.
-
----
-
-## Performance notes
-
-PROXIMA is built with JAX to enable:
-
-- array-based batch simulation,
-- vectorized parameter sweeps,
-- compiled numerical evaluation,
-- higher throughput in optimization loops.
-
-For scientific work, this is especially useful when evaluating many candidate parameter sets during a search or convergence study.
-
----
-
-## Testing and validation
-
-The project includes a substantial test suite covering:
-
-- contract integrity,
-- metric and energy validation,
-- convergence benchmarks,
-- optimization end-to-end runs,
-- risk assessment behavior,
-- cache and reproducibility checks,
-- astrophysical data schema checks.
-
-This makes PROXIMA suitable for validating research pipelines before using them in more elaborate experimental workflows.
-
----
-
-## Advanced configuration
-
-Most scientific defaults are shipped through YAML configuration files under `configs/`. This includes phase-based defaults for metric, simulator, data, and optimizer behavior.
-
-Configuration can be loaded programmatically through the package helpers, making it easy to maintain consistent scientific assumptions across a project or experiment suite.
-
----
-
-## Example: full end-to-end mission evaluation
-
-```python
-from proxima import (
-    BobrickMartireMetricCore,
-    RelativisticSimulator,
-    VectorizedPSO,
-    PSOConfig,
-    WarpParameterVector,
-    MetricStatePoint,
-    SimulationRequest,
-)
-from proxima.contracts.types import (
-    MetricSignature,
-    ScientificConventions,
-    Frame,
-)
-
-params = WarpParameterVector(
-    bubble_radius_m=120.0,
-    shell_thickness_m=6.0,
-    velocity_fraction_c=0.7,
-    shift_amplitude=1.2,
-    lapse_floor=0.02,
-)
-
-state = MetricStatePoint(t_s=0.0, x_m=0.0, y_m=0.0, z_m=0.0, tau_s=0.0)
-
-conventions = ScientificConventions(
-    phase0_version="1.0.0",
-    metric_signature=MetricSignature.MINUS_PLUS_PLUS_PLUS,
-    global_frame=Frame.ICRS,
-    local_frame=Frame.LOCAL_CARTESIAN_3P1,
-    c_m_per_s=299792458.0,
-    g_m3_per_kg_s2=6.67430e-11,
-    atol=1e-10,
-    rtol=1e-8,
-)
-
-core = BobrickMartireMetricCore()
-metric_eval = core.evaluate_metric(params, state)
-print("Metric valid:", metric_eval.valid_domain)
 
 sim = RelativisticSimulator()
 request = SimulationRequest(
     params=params,
-    initial_state=state,
+    initial_state=point,
     conventions=conventions,
-    max_steps=200,
+    max_steps=500,
 )
-result = sim.simulate(request)
-print("Simulation status:", result.status)
 
-cfg = PSOConfig(n_particles=12, n_iterations=12, seed=7)
-pso = VectorizedPSO(config=cfg)
-opt = pso.optimize_warp(seed=7)
-print("Best fitness:", opt.best_fitness)
-print("Best parameters:", opt.best_params)
+result = sim.simulate(request)
+
+if result.status.value == "success":
+    obs = result.observables
+    print(f"Elapsed coordinate time Delta t: {obs.delta_t_s:.6e} s")
+    print(f"Elapsed proper time Delta tau:    {obs.delta_tau_s:.6e} s")
+    print(f"Maximum tidal stress:             {obs.tidal_stress_max_si:.6e} s^-2")
+    print(f"Energy conditions report:         WEC={result.energy_conditions.wec_ok}")
+```
+
+### 3. Querying Real Celestial Environments & In-Transit Risk
+
+```python
+from proxima import (
+    default_local_risk_provider,
+    RouteSegment,
+    SkyCoordinates,
+    Frame,
+)
+from proxima.contracts.types import DataQueryContext
+
+# Load real bundled astronomical environments (Sharpless, MWSC, SNRs)
+provider = default_local_risk_provider()
+print(f"Loaded {len(provider.records)} real astronomical bodies into memory.")
+
+# Define an interstellar route segment (in meters, Cartesian 3+1 relative to target)
+segment = RouteSegment(
+    start_xyz_m=(0.0, 0.0, 0.0),
+    end_xyz_m=(1.0e16, 0.0, 0.0),
+    frame=Frame.LOCAL_CARTESIAN_3P1,
+)
+
+# Target celestial coordinates: Lambda Orionis ring (Sh2-264)
+target_sky = SkyCoordinates(ra_deg=83.8, dec_deg=9.9, distance_pc=400.0, frame=Frame.ICRS)
+context = DataQueryContext(
+    dataset_version="v1.0.0",
+    extraction_timestamp_utc="2026-11-09T00:00:00Z",
+    cache_key="mission_alpha",
+)
+
+risk = provider.evaluate_segment_risk(segment, target_sky, context)
+print("Radiative flux score [0, 1]:", risk.radiative_flux_score)
+print("H column / extinction score:", risk.extinction_h_column_score)
+print("Total composite risk score: ", risk.total_risk_score)
+```
+
+### 4. Global Multi-Particle Warp Optimization
+
+```python
+from proxima import VectorizedPSO, PSOConfig
+
+# Configure swarm parameters
+pso_config = PSOConfig(
+    n_particles=30,
+    n_iterations=40,
+    topology="global",    # Or "ring" for enhanced local exploration
+    seed=101,
+    w_max=0.9,
+    w_min=0.4,
+    c1=1.5,
+    c2=1.5,
+)
+
+pso = VectorizedPSO(config=pso_config)
+
+# Run full relativistic optimization coupled to geodesic simulations
+opt_result = pso.optimize_warp(seed=101)
+
+print("\n--- OPTIMIZATION CONVERGED ---")
+print("Best fitness score:", opt_result.best_fitness)
+print("Optimized bubble radius (m):     ", opt_result.best_params.bubble_radius_m)
+print("Optimized shell thickness (m):   ", opt_result.best_params.shell_thickness_m)
+print("Optimized velocity fraction (c): ", opt_result.best_params.velocity_fraction_c)
+print("Optimized shift amplitude:       ", opt_result.best_params.shift_amplitude)
+print("Optimized lapse floor:           ", opt_result.best_params.lapse_floor)
+```
+
+### 5. Running Calibration, Sensitivity & Non-Regression Suites
+
+```python
+from proxima.validation import CalibrationEngine, IntegralValidator
+
+# 1. Run canonical non-regression tests
+validator = IntegralValidator()
+report = validator.run_regression_suite()
+assert report.all_passed, "Numerical divergence detected across canonical baselines!"
+print("Integral validation: All canonical benchmarks passed within tolerance.")
+
+# 2. Compute elasticity gradient sensitivities (dF/F) / (dTheta/Theta)
+engine = CalibrationEngine()
+nominal_vec = (100.0, 5.0, 0.5, 1.0, 0.01)
+sens = engine.analyze_warp_sensitivity(
+    lambda vec: (vec[0] / 100.0)**2 + (vec[2] / 0.5)**3,
+    nominal_vec,
+    delta_rel=0.05,
+)
+
+for param_name, elasticity in sens.sensitivities.items():
+    print(f"Normalized sensitivity of {param_name:22s}: {elasticity:.4f}")
+```
+
+---
+
+## Technical Specifications & Conventions
+
+| Property | Standard / Value | Notes |
+| :--- | :--- | :--- |
+| **Metric Signature** | $(-, +, +, +)$ | Modern General Relativity convention |
+| **System of Units** | International System (SI) | Distances in $\si{\meter}$, times in $\si{\second}$, energies in $\si{\joule}$ |
+| **Coordinate System** | $X^\mu = (ct, x, y, z)$ | $x^0 = ct$ in meters, 4-velocities $u^\mu = \frac{dX^\mu}{c d\tau}$ |
+| **Global Celestial Frame** | ICRS (J2000.0) | Rotations from Galactic $(l, b)$ via IAU 1958/Hipparcos matrix |
+| **Physical Constants** | $c = 299\,792\,458.0\text{ m/s}$<br>$G = 6.67430 \times 10^{-11}\text{ m}^3\text{kg}^{-1}\text{s}^{-2}$ | Frozen in Phase 0 contract specs |
+| **Core Regularization** | $\epsilon_{\text{rel}} = 1.0 \times 10^{-9}$ | $r_{s,\text{reg}} = \sqrt{r_s^2 + (\epsilon_{\text{rel}} R)^2}$ |
+| **Tidal Limit Threshold** | $\sigma_{\text{tidal}} \le 9.81\text{ s}^{-2}$ | Evaluated via local spatial Fermi-Walker frame |
+| **Energy Classifier** | Hawking-Ellis Type-I | Real eigenvalue stress-energy tensor decomposition |
+| **Cache Architecture** | L1 LRU + L2 Disk JSON | SHA-256 cryptographic digests with TTL invalidation |
+| **Acceleration Engine** | Google JAX | `jax.vmap` batching with `jax.jit` compiled execution |
+
+---
+
+## Author & Academic Citation
+
+**PROXIMA** was developed by **Leonardo Zamudio**.
+
+If you use **PROXIMA** in scientific research, academic publications, or numerical studies of spacetime warp metrics, please cite:
+
+```bibtex
+@software{zamudio_proxima_2026,
+  author       = {Leonardo Zamudio},
+  title        = {PROXIMA: Relativistic Optimization and Simulation Engine for Bobrick-Martire Warp Spacetimes},
+  year         = {2026},
+  publisher    = {PyPI},
+  version      = {1.0.0},
+  url          = {https://pypi.org/project/proxima-warp/}
+}
 ```
 
 ---
 
 ## License
 
-This project is distributed under the MIT license.
-
----
-
-## Support and research context
-
-PROXIMA is a research-oriented library for advanced modeling of relativistic warp-drive-inspired mission concepts. It is designed to be transparent, inspectable, and configurable, so that users can evaluate assumptions, tune numerical settings, and integrate the model into larger experimentation pipelines.
-
-For production research workflows, it is recommended to:
-
-- maintain version pinning for scientific dependencies,
-- store configuration snapshots alongside experiment results,
-- keep risk and catalog provenance data with your analyses,
-- validate outputs against established regression tests before publication or downstream use.
-
----
-
-## Summary
-
-PROXIMA provides a complete scientific stack for relativistic mission modeling and optimization in Python, integrating:
-
-- warp geometry evaluation,
-- relativistic geodesic simulation,
-- energy-condition diagnostics,
-- astrophysical risk assessment,
-- parameter optimization with JAX-based PSO.
-
-It is intended as a research-grade toolkit for users working at the intersection of physics, numerical analysis, and space mission design.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for complete details.

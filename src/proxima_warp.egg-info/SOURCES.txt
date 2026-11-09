@@ -1,3 +1,4 @@
+LICENSE
 README.md
 pyproject.toml
 src/proxima/__init__.py
