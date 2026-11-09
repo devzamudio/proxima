@@ -1,0 +1,32 @@
+phase1:
+  version: "1.0.0"
+  based_on_phase0: "1.0.0"
+
+# Orden canonico del vector de parametros (reutilizado por la PSO, Fase 4).
+parameter_order:
+  - bubble_radius_m
+  - shell_thickness_m
+  - velocity_fraction_c
+  - shift_amplitude
+  - lapse_floor
+
+# Limites [min, max] inclusivos del dominio permitido.
+parameter_bounds:
+  bubble_radius_m: [1.0e-3, 1.0e9]
+  shell_thickness_m: [1.0e-4, 1.0e8]
+  velocity_fraction_c: [0.0, 1.0]       # max se ignora si allow_superluminal
+  shift_amplitude: [0.0, 1.0]
+  lapse_floor: [1.0e-6, 1.0]
+
+superluminal_velocity_max: 10.0
+
+safety:
+  # Regularizacion r_s -> sqrt(r_s^2 + eps^2), relativa al radio de burbuja.
+  radius_regularization_rel: 1.0e-9
+
+canonical_case:
+  bubble_radius_m: 100.0
+  shell_thickness_m: 5.0
+  velocity_fraction_c: 0.5
+  shift_amplitude: 1.0
+  lapse_floor: 0.01

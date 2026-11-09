@@ -1,0 +1,13 @@
+jax>=0.4.30
+numpy>=1.26
+pyyaml>=6.0
+
+[astro]
+astropy>=6.0
+astroquery>=0.4.7
+dustmaps>=1.0.13
+isochrones>=2.1
+
+[dev]
+pytest>=7.0
+sympy>=1.12

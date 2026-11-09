@@ -1,0 +1,27 @@
+phase2:
+  version: "1.0.0"
+  based_on_phase0: "1.0.0"
+
+  integration:
+    h0_s: 1.0e-3
+    h_min_s: 1.0e-12
+    h_max_s: 1.0e-1
+    atol: 1.0e-10
+    rtol: 1.0e-8
+    norm_tol: 1.0e-6
+
+  guards:
+    tidal_limit_per_s2: 9.81
+    tau_final_s: 1.0
+
+  energy_integral:
+    n_grid: 32
+    extent_rel: 2.0
+
+  energy_backend: "own"
+
+  energy_thresholds:
+    wec: 1.0e-10
+    nec: 1.0e-10
+    dec: 1.0e-10
+    sec: 1.0e-10

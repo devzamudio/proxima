@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proxima-warp"
+version = "1.0.0"
+description = "Motor relativista Bobrick-Martire + PSO para simulación y optimización de viajes interestelares"
+readme = "README.md"
+authors = [
+    {name = "Equipo de Investigación Proxima"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Typing :: Typed",
+]
+dependencies = [
+    "jax>=0.4.30",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+astro = [
+    "astropy>=6.0",
+    "astroquery>=0.4.7",
+    "dustmaps>=1.0.13",
+    "isochrones>=2.1",
+]
+dev = [
+    "pytest>=7.0",
+    "sympy>=1.12",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+proxima = [
+    "py.typed",
+    "configs/**/*.yaml",
+    "configs/**/*.csv",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra"
+markers = [
+    "contract: pruebas de conformidad de contratos entre capas",
+    "template: pruebas plantilla que requieren implementaciones concretas",
+]
+testpaths = ["tests"]

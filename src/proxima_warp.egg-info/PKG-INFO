@@ -1,0 +1,149 @@
+Metadata-Version: 2.4
+Name: proxima-warp
+Version: 1.0.0
+Summary: Motor relativista Bobrick-Martire + PSO para simulación y optimización de viajes interestelares
+Author: Equipo de Investigación Proxima
+License: MIT
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Physics
+Classifier: Topic :: Scientific/Engineering :: Astronomy
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Classifier: Operating System :: OS Independent
+Classifier: Typing :: Typed
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: jax>=0.4.30
+Requires-Dist: numpy>=1.26
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: astro
+Requires-Dist: astropy>=6.0; extra == "astro"
+Requires-Dist: astroquery>=0.4.7; extra == "astro"
+Requires-Dist: dustmaps>=1.0.13; extra == "astro"
+Requires-Dist: isochrones>=2.1; extra == "astro"
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: sympy>=1.12; extra == "dev"
+
+# PROXIMA
+
+**PROXIMA** es un motor científico en Python y JAX para modelar, simular y optimizar misiones interestelares relativistas empleando espaciotiempos de deformación métrica (*warp drive*) basados en la clase formal de soluciones de **Bobrick y Martire (2021)** en formulación $3+1$ (ADM).
+
+---
+
+## Características Principales
+
+1. **Núcleo Métrico Bobrick-Martire (ADM)**: Cálculo tensorial covariante (Christoffel, Riemann, Ricci, Einstein $G_{\mu\nu}$, densidades de energía eulerianas) en coordenadas $3+1$.
+2. **Simulador de Geodésicas Relativista**: Integración adaptativa DP5/RK45 con control estricto de norma temporal y esfuerzos de marea locales en la tétrada de Fermi-Walker ($\sigma_{\text{tidal}} \le 9.81\text{ s}^{-2}$).
+3. **Clasificación de Hawking-Ellis**: Verificación rigurosa de condiciones de energía clásicas (WEC, NEC, DEC, SEC) por diagonalización tensorial.
+4. **Capa de Datos Astronómicos**: Integración de catálogos estelares reales (Gaia DR3, NASA Exoplanet Archive, SIMBAD, Sharpless, MWSC, SNRs), cálculo analítico de fluencia radiante, atenuación por polvo (Bayestar19) y caché multinivel persistente con validación SHA-256.
+5. **Optimizador PSO Vectorizado en JAX**: Algoritmo de enjambre de partículas compilado en `jax.jit` con soporte para topologías en estrella (global) y anillo (local), buscando vectores warp $\boldsymbol{\theta}$ que minimizan tiempo, energía y violaciones físicas.
+6. **Validación Integral y No-Regresión**: Suite exhaustiva de pruebas, barrido de sensibilidad y análisis de robustez ante incertidumbre astrofísica.
+
+---
+
+## Instalación
+
+### Instalación estándar vía pip
+```bash
+pip install .
+```
+
+### Con dependencias astronómicas completas
+```bash
+pip install .[astro]
+```
+
+### Para desarrollo y pruebas
+```bash
+pip install .[dev]
+```
+
+---
+
+## Uso Rápido en otros Proyectos Python
+
+### 1. Evaluación del Núcleo Métrico
+```python
+from proxima import (
+    BobrickMartireMetricCore,
+    MetricStatePoint,
+    WarpParameterVector,
+)
+
+# Definir configuración de la burbuja warp
+params = WarpParameterVector(
+    bubble_radius_m=100.0,
+    shell_thickness_m=5.0,
+    velocity_fraction_c=0.5,
+    shift_amplitude=1.0,
+    lapse_floor=0.01,
+)
+
+# Evaluar la métrica en un punto del espaciotiempo
+punto = MetricStatePoint(t_s=0.0, x_m=50.0, y_m=0.0, z_m=0.0, tau_s=0.0)
+core = BobrickMartireMetricCore()
+evaluacion = core.evaluate_metric(params, punto)
+
+print("Lapse alpha:", evaluacion.lapse)
+print("Shift vector beta (m/s):", evaluacion.shift_vector)
+```
+
+### 2. Simulación Relativista de Geodésicas
+```python
+from proxima import (
+    RelativisticSimulator,
+    SimulationRequest,
+    ScientificConventions,
+    MetricStatePoint,
+    WarpParameterVector,
+    Frame,
+    MetricSignature,
+)
+
+conventions = ScientificConventions(
+    phase0_version="1.0.0",
+    metric_signature=MetricSignature.MINUS_PLUS_PLUS_PLUS,
+    global_frame=Frame.ICRS,
+    local_frame=Frame.LOCAL_CARTESIAN_3P1,
+    c_m_per_s=299792458.0,
+    g_m3_per_kg_s2=6.67430e-11,
+    atol=1e-10,
+    rtol=1e-8,
+)
+
+sim = RelativisticSimulator()
+req = SimulationRequest(
+    params=params,
+    initial_state=punto,
+    conventions=conventions,
+    max_steps=200,
+)
+resultado = sim.simulate(req)
+
+if resultado.status.value == "success":
+    print("Tiempo propio acumulado (s):", resultado.observables.delta_tau_s)
+    print("Tiempo coordinado acumulado (s):", resultado.observables.delta_t_s)
+    print("Esfuerzo de marea máximo (s^-2):", resultado.observables.tidal_stress_max_si)
+```
+
+### 3. Optimización con PSO
+```python
+from proxima import VectorizedPSO, PSOConfig
+
+cfg = PSOConfig(n_particles=20, n_iterations=30, seed=42)
+pso = VectorizedPSO(config=cfg)
+
+# Optimizar parámetros warp acoplados al simulador y al entorno estelar
+opt_res = pso.optimize_warp()
+print("Parámetros óptimos encontrados:", opt_res.best_params)
+print("Aptitud (fitness):", opt_res.best_fitness)
+```
+
+---
+
+## Licencia
+Código científico bajo licencia MIT.

@@ -1,0 +1,52 @@
+phase3:
+  version: "1.0.0"
+  based_on_phase0: "1.0.0"
+  pipeline_version: "1.0.0"
+  unit_system: "SI"
+  default_frame: "ICRS"
+
+cache:
+  memory_max_entries: 256
+  ttl_seconds:
+    exoplanet_tap: 86400
+    gaia_dr3: 604800
+    simbad: 604800
+    bayestar19: 2592000
+    mist: 2592000
+    local_csv: 31536000
+
+governance:
+  max_retries: 3
+  backoff_seconds: 0.05
+  max_batch_size: 500
+  simbad_max_Sequential_single_queries: 3
+  rate_limit_calls_per_window: 50
+  rate_limit_window_seconds: 60.0
+
+cross_match:
+  angular_tolerance_arcsec: 5.0
+  distance_rel_tolerance: 0.15
+
+dataset_versions:
+  exoplanet_tap: "pscomppars"
+  gaia_dr3: "gaiadr3"
+  simbad: "simbad-4"
+  bayestar19: "bayestar2019"
+  mist: "MIST-v1.2"
+  local_csv: "auto-checksum"
+
+environment:
+  ism_n_h_m3: 1.0e5          # H de fondo, 0.1 cm^-3 (Burbuja Local)
+  transit_speed_m_s: 29979245.8  # 0.1 c para integrar fluencia radiante
+  gas_object_types: ["HII_region", "supernova_remnant"]
+
+risk_scales_si:
+  radiative_flux_j_m2: 1.0e6
+  h_column_m2: 1.0e25
+  mass_density_kg_m3: 1.0e-18
+  tidal_stress_s2: 1.0e-10
+  weights:
+    radiative: 0.30
+    extinction: 0.25
+    mass_density: 0.25
+    tidal: 0.20

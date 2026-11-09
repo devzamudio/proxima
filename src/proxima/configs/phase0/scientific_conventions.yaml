@@ -1,0 +1,34 @@
+phase0:
+  version: "1.0.0"
+  approved_on: "2026-11-08"
+
+metric:
+  signature: "-+++"
+  coordinates: ["t", "x", "y", "z"]
+
+constants_si:
+  c_m_per_s: 299792458.0
+  G_m3_per_kg_s2: 6.67430e-11
+
+units:
+  time: "s"
+  length: "m"
+  mass: "kg"
+  energy: "J"
+  velocity: "m/s"
+
+frames:
+  default_global: "ICRS"
+  simulation_local: "LOCAL_CARTESIAN_3P1"
+
+tolerances:
+  atol: 1.0e-10
+  rtol: 1.0e-8
+
+energy_conditions:
+  enabled: ["WEC", "NEC", "DEC", "SEC"]
+  report_mode: ["point", "segment", "aggregate"]
+
+policy:
+  prohibit_implicit_unit_conversion: true
+  require_traceability_metadata: true

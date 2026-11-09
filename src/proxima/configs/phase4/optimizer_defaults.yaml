@@ -1,0 +1,35 @@
+phase4:
+  version: "1.0.0"
+  based_on_phase0: "1.0.0"
+
+pso:
+  n_particles: 30
+  n_iterations: 50
+  topology: "global"      # "global" o "ring" (local)
+  ring_neighborhood_size: 3
+  seed: 42
+  
+  # Cronograma de inercia y parametros cognitivo/social
+  w_max: 0.9
+  w_min: 0.4
+  c1: 1.5                # componente cognitiva (pbest)
+  c2: 1.5                # componente social (gbest / lbest)
+  v_clamp_ratio: 0.2     # v_max = v_clamp_ratio * (upper_bound - lower_bound)
+
+objective_weights:
+  mission_time_s: 1.0           # escala de tiempo coordenado / propio
+  mission_tau_weight: 0.5       # ponderacion de tiempo propio en termino de mision
+  energy_scale_j: 1.0e20        # escala de energia
+  energy_weight: 0.1            # peso relativo de energia en termino de mision
+  
+  # Penalizaciones fisicas (multiplicadores de corte o exceso)
+  penalty_wec: 1.0e4
+  penalty_nec: 1.0e4
+  penalty_sec: 1.0e3
+  penalty_dec: 1.0e3
+  penalty_tidal: 1.0e5
+  
+  # Penalizaciones operativas y de riesgo
+  penalty_risk: 1.0e3
+  penalty_invalid_domain: 1.0e7
+  penalty_simulation_failure: 1.0e6
