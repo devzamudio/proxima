@@ -1,4 +1,4 @@
-# PROXIMA
+# PROXIMA: Particle Relativistic Optimization for Extended Interstellar Mission Analysis
 
 PROXIMA is a scientific Python library for modeling, simulating, and optimizing relativistic interstellar missions using warp-drive-inspired spacetime geometries grounded in the formal Bobrick–Martire family of solutions in a 3+1 ADM formulation.
 
