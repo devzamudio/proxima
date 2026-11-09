@@ -1,0 +1,67 @@
+# Python bytecode and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+pythonenv*/
+
+# Packaging and distribution
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+pip-wheel-metadata/
+.eggs/
+MANIFEST
+
+# Test / coverage / profiling
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
+.env.*
+
+# Generated documentation artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+
+# Local caches and data
+.cache/
+*.sqlite3
+
+# Project-specific generated metadata
+src/proxima_warp.egg-info/
