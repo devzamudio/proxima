@@ -29,7 +29,7 @@ from proxima.optimizer.optimizer import VectorizedPSO, OptimizationResult
 from proxima.optimizer.config import PSOConfig
 from proxima.optimizer.fitness import RelativisticFitnessEvaluator
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 __all__ = [
     # Subpaquetes
