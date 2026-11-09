@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: proxima-warp
-Version: 1.0.1
+Version: 1.0.2
 Summary: Motor relativista Bobrick-Martire + PSO para simulación y optimización de viajes interestelares
 Author: Leonardo Zamudio
 License: MIT
@@ -131,7 +131,7 @@ Geodesics are integrated in normalized affine time $\lambda = c\tau$:
 $$\frac{dX^\mu}{d\lambda} = u^\mu, \qquad \frac{du^\mu}{d\lambda} = -\Gamma^\mu_{\alpha\beta} u^\alpha u^\beta$$
 
 The ship's structural safety is monitored through the spatial tidal tensor in Fermi-Walker coordinates:
-$$\sigma_{\text{tidal}} = \max_k |\lambda_k(\mathcal{E}_{ij})| \quad [\si{\per\second\squared}]$$
+$$\sigma_{\text{tidal}} = \max_k |\lambda_k(\mathcal{E}_{ij})| \quad [\text{s}^{-2}]$$
 
 ### 3. Hawking-Ellis Energy Conditions Classification
 
@@ -144,10 +144,10 @@ The effective stress-energy-momentum tensor $T_{\mu\nu} = \frac{c^4}{8\pi G} G_{
 ### 4. Astrophysical Risk & Environmental Data Layer
 
 Transit segments are evaluated for four cumulative physical hazards:
-1. **Integrated Radiative Fluence** ($\si{\joule\per\meter\squared}$): $F = \sum_k \frac{L_k}{4\pi v} \int \frac{ds}{r_k(s)^2 + R_k^2}$
-2. **Neutral Hydrogen Column & Extinction** ($\si{\per\meter\squared}$): Background ISM ($n_H = 10^5\text{ m}^{-3}$) plus chord lengths through H II clouds and supernova remnants.
-3. **Local Mass Density Field** ($\si{\kilo\gram\per\meter\cubed}$).
-4. **External Gravitational Tidal Gradients** ($\si{\per\second\squared}$).
+1. **Integrated Radiative Fluence** ($\text{J}\cdot\text{m}^{-2}$): $F = \sum_k \frac{L_k}{4\pi v} \int \frac{ds}{r_k(s)^2 + R_k^2}$
+2. **Neutral Hydrogen Column & Extinction** ($\text{m}^{-2}$): Background ISM ($n_H = 10^5\text{ m}^{-3}$) plus chord lengths through H II clouds and supernova remnants.
+3. **Local Mass Density Field** ($\text{kg}\cdot\text{m}^{-3}$).
+4. **External Gravitational Tidal Gradients** ($\text{s}^{-2}$).
 
 ### 5. JAX-Vectorized Particle Swarm Optimizer (PSO)
 
@@ -358,7 +358,7 @@ for param_name, elasticity in sens.sensitivities.items():
 | Property | Standard / Value | Notes |
 | :--- | :--- | :--- |
 | **Metric Signature** | $(-, +, +, +)$ | Modern General Relativity convention |
-| **System of Units** | International System (SI) | Distances in $\si{\meter}$, times in $\si{\second}$, energies in $\si{\joule}$ |
+| **System of Units** | International System (SI) | Distances in meters ($\text{m}$), times in seconds ($\text{s}$), energies in joules ($\text{J}$) |
 | **Coordinate System** | $X^\mu = (ct, x, y, z)$ | $x^0 = ct$ in meters, 4-velocities $u^\mu = \frac{dX^\mu}{c d\tau}$ |
 | **Global Celestial Frame** | ICRS (J2000.0) | Rotations from Galactic $(l, b)$ via IAU 1958/Hipparcos matrix |
 | **Physical Constants** | $c = 299\,792\,458.0\text{ m/s}$<br>$G = 6.67430 \times 10^{-11}\text{ m}^3\text{kg}^{-1}\text{s}^{-2}$ | Frozen in Phase 0 contract specs |
@@ -382,7 +382,7 @@ If you use **PROXIMA** in scientific research, academic publications, or numeric
   title        = {PROXIMA: Relativistic Optimization and Simulation Engine for Bobrick-Martire Warp Spacetimes},
   year         = {2026},
   publisher    = {PyPI},
-  version      = {1.0.0},
+  version      = {1.0.2},
   url          = {https://pypi.org/project/proxima-warp/}
 }
 ```

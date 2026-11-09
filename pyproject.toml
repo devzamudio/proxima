@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "proxima-warp"
-version = "1.0.1"
+version = "1.0.2"
 description = "Motor relativista Bobrick-Martire + PSO para simulación y optimización de viajes interestelares"
 readme = "README.md"
 authors = [
