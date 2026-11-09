@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: proxima-warp
-Version: 1.0.2
+Version: 1.0.3
 Summary: Motor relativista Bobrick-Martire + PSO para simulación y optimización de viajes interestelares
 Author: Leonardo Zamudio
 License: MIT
@@ -72,7 +72,7 @@ Dynamic: license-file
 - **Covariant $3+1$ ADM Formulation**: Metric lapse function $\alpha(t, \mathbf{x})$, longitudinal and transverse shift vector $\boldsymbol{\beta}(t, \mathbf{x})$, and spatial 3-metric $\gamma_{ij}$.
 - **Hyperbolic Shape Regularization**: Eliminates coordinate singularities at the bubble core via $r_{s,\text{reg}} = \sqrt{r_s^2 + (\epsilon_{\text{rel}} R)^2}$.
 - **Adaptive Geodesic Integration**: 8-dimensional covariant phase-space integration $(X^\mu, u^\mu)$ driven by Dormand-Prince (DP5/RK45) with strict 4-velocity preservation ($|g_{\mu\nu}u^\mu u^\nu + 1| < 10^{-6}$).
-- **Riemann & Fermi Tidal Stress Guard**: Covariant local spatial tidal tensor $\mathcal{E}^i{}_j = c^2 R^i{}_{0 j 0}$ with automatic cut-off preventing spaghettification ($\sigma_{\text{tidal}} \le 9.81\text{ s}^{-2}$).
+- **Riemann & Fermi Tidal Stress Guard**: Covariant local spatial tidal tensor $\mathcal{E}_{ij} = c^2 R_{i0j0}$ with automatic cut-off preventing spaghettification ($\sigma_{\text{tidal}} \le 9.81\text{ s}^{-2}$).
 - **Hawking-Ellis Type-I Energy Condition Classifiers**: Eigenvalue diagonalization verifying Weak (WEC), Null (NEC), Dominant (DEC), and Strong (SEC) Energy Conditions.
 - **Real Astronomical Field Modeling**: Bundled ICRS-normalized catalogs (Sharpless H II regions, MWSC stellar clusters, and Supernova Remnants) plus live TAP/ADQL clients (Gaia DR3, NASA Exoplanet Archive, SIMBAD, and Bayestar19 dust extinction).
 - **SIMD/JIT Accelerated PSO**: Particle Swarm Optimization fully vectorized via `jax.vmap` and `jax.jit` supporting Global Star and Local Ring communication topologies.
@@ -382,7 +382,7 @@ If you use **PROXIMA** in scientific research, academic publications, or numeric
   title        = {PROXIMA: Relativistic Optimization and Simulation Engine for Bobrick-Martire Warp Spacetimes},
   year         = {2026},
   publisher    = {PyPI},
-  version      = {1.0.2},
+  version      = {1.0.3},
   url          = {https://pypi.org/project/proxima-warp/}
 }
 ```
